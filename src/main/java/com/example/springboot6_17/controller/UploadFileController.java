@@ -27,7 +27,7 @@ import java.io.IOException;
 @Slf4j
 @RestController
 public class UploadFileController {
-    /*
+    
     @Autowired
     private UploadFileServiceImpl uploadFileService;
 
@@ -52,5 +52,5 @@ public class UploadFileController {
         return resultResponse;
     }
 
-*/
+
 }
