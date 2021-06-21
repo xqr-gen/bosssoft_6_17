@@ -26,7 +26,7 @@ public class UploadFileDTO {
 
     private Long clientCRC;
     private Long serverCRC;
-
+    private String url;
     private final String endpoint= CommonOss.endpoint;
     private String inputStreamPath;
 }
