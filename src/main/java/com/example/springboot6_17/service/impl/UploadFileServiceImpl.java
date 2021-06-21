@@ -79,6 +79,12 @@ public class UploadFileServiceImpl implements UploadFileService {
             CompleteMultipartUploadRequest completeMultipartUploadRequest =
                     new CompleteMultipartUploadRequest(CommonOss.bucket, objectName, uploadId, partETags);
             CompleteMultipartUploadResult completeMultipartUploadResult = ossClient.completeMultipartUpload(completeMultipartUploadRequest);
+            // 设置URL过期时间为1小时。
+            // Date expiration1 = new Date(new Date().getTime() + 3600 * 1000)
+            Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000);
+            // 生成以GET方法访问的签名URL，访客可以直接通过浏览器访问相关内容。
+            URL url = ossClient.generatePresignedUrl(CommonOss.bucket, objectName, expiration);
+            uploadFileDTO.setUrl(url.toString());
             uploadFileDTO.setObjectName(objectName);
             uploadFileDTO.setInputStreamPath(completeMultipartUploadResult.getLocation());
             uploadFileDTO.setClientCRC(completeMultipartUploadResult.getClientCRC());
