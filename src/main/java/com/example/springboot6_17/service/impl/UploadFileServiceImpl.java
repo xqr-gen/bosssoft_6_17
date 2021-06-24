@@ -5,6 +5,7 @@ import cn.hutool.core.date.DateTime;
 import com.aliyun.oss.OSS;
 import com.aliyun.oss.OSSClientBuilder;
 
+import com.aliyun.oss.common.utils.CRC64;
 import com.aliyun.oss.model.*;
 import com.example.springboot6_17.common.CommonOss;
 import com.example.springboot6_17.pojo.dto.UploadFileDTO;
@@ -18,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -79,6 +82,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             CompleteMultipartUploadRequest completeMultipartUploadRequest =
                     new CompleteMultipartUploadRequest(CommonOss.bucket, objectName, uploadId, partETags);
             CompleteMultipartUploadResult completeMultipartUploadResult = ossClient.completeMultipartUpload(completeMultipartUploadRequest);
+
             // 设置URL过期时间为1小时。
             // Date expiration1 = new Date(new Date().getTime() + 3600 * 1000)
             Date expiration = new Date(System.currentTimeMillis() + 3600 * 1000);
@@ -87,6 +91,7 @@ public class UploadFileServiceImpl implements UploadFileService {
             uploadFileDTO.setUrl(url.toString());
             uploadFileDTO.setObjectName(objectName);
             uploadFileDTO.setInputStreamPath(completeMultipartUploadResult.getLocation());
+            uploadFileDTO.setServerCRC(getServiceCRC(file));
             uploadFileDTO.setClientCRC(completeMultipartUploadResult.getClientCRC());
             ossClient.shutdown();
         }catch (Exception e){
@@ -96,6 +101,22 @@ public class UploadFileServiceImpl implements UploadFileService {
         return uploadFileDTO;
     }
 
+    @Override
+    public long getServiceCRC(MultipartFile file) throws IOException{
+        final CRC64 total = new CRC64();
+        try (FileInputStream stream = (FileInputStream) file.getInputStream()) {
+            final byte[] b = new byte[1024 * 1024];
+            while (true) {
+                final int read = stream.read(b);
+                if (read <= 0) {
+                    break;
+                }
+                total.update(b, read);
+            }
+        }
+        return total.getValue();
+        // return Long.toUnsignedString(total.getValue());
+    }
 
 
 }
