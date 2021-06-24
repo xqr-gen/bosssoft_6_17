@@ -18,5 +18,6 @@ public interface UploadFileService {
      */
     public UploadFileDTO uploadFile(MultipartFile file,UploadFileDTO uploadFileDTO) throws IOException;
 
+    public long getServiceCRC(MultipartFile file) throws IOException;
 
 }
